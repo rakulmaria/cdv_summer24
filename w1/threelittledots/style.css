@@ -1,0 +1,8 @@
+body {
+    background: #646165;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Makes the body take up the full height of the viewport */
+    margin: 0; /* Removes default margin */
+}
