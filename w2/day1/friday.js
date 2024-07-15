@@ -3,56 +3,30 @@ const width = 800 - margin.left - margin.right;
 const height = 400 - margin.top - margin.bottom;
 const radius = 22;
 
-const skydata = [{
-    color: "#586474",
-    weather: "cloudy",
-    humidity: 0.7
-}, 
-{
-    color: "#5c6a7a",
-    weather: "raining",
-    humidity: 0.65 
-},
-{
-    color: "#535f6b",
-    weather: "raining",
-    humidity: 0.65 
-},
-{
-    color: "#5e6e7c",
-    weather: "raining",
-    humidity: 0.65 
-},
-{
-    color: "#546273",
-    weather: "raining",
-    humidity: 0.7 
-},
-{
-    color: "#5c697c",
-    weather: "cloudy",
-    humidity: 0.7 
-},
-{
-    color: "#5c697c",
-    weather: "cloudy",
-    humidity: 0.65 
-},
-{
-    color: "#56677c",
-    weather: "cloudy",
-    humidity: 0.60
-},
-{
-    color: "#53657a",
-    weather: "cloudy",
-    humidity: 0.65 
-},
-{
-    color: "#47586b",
-    weather: "cloudy",
-    humidity: 0.65 
-}]
+var skydata = [];
+
+//load the external data file
+d3.json('skydata.json').then(function(d) {
+    skydata = d;
+})
+
+function draw() {
+    // establish the domain
+
+    var min = d3.min(skydata, function(d) { return d.humidity })
+    var max = d3.max(skydata, function(d) { return d.humidity })
+
+    console.log(min, max)
+
+    // xScale = timeScale
+    // yScale = 
+
+    const yScale = d3.scaleLinear()
+        .domain([min, max]) // humidity ranges from min humidity to max humidity
+        .range([height, 0]); // Invert the range so 0 is at the bottom and 100 is at the top
+    
+
+}
 
 const svg = d3.select("svg");
 const expl = d3.select("#explanation");
