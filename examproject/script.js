@@ -283,7 +283,7 @@ function draw() {
 	function drawDescriptionShapes() {
 		const pad = 20;
 
-		// PP - min
+		// PP
 		description
 			.append("circle")
 			.attr("cx", margin.left + pad)
@@ -341,7 +341,7 @@ function draw() {
 				.attr("stroke", "none");
 		}
 
-		// Fog - min
+		// Fog
 		description
 			.append("path")
 			.attr("d", fogPath)
