@@ -14,16 +14,16 @@ const colors = {
 	fog: "#6c757d",
 };
 
-// SVG for the description - containing each of the shape
-var description = d3
+// SVG for the description - containing one element of each of the datapoints
+const description = d3
 	.select("#data-description")
 	.append("svg")
 	.attr("width", 100)
 	.attr("height", 590)
 	.style("background-color", colors.background);
 
-// setup canvas with the main svg
-var canvas = d3
+// setup canvas with the main SVG
+const canvas = d3
 	.select("#canvas")
 	.append("svg")
 	.attr("width", width)
@@ -37,11 +37,58 @@ d3.json("data.json").then(function (d) {
 	draw();
 });
 
-// helper functions
-const randomPosition = (min, max) => Math.random() * (max - min) + min;
-
+// the main code
 function draw() {
-	// setup a gradient for the temperature line
+	// helper values for creating different scales
+	const minPP = Math.min(...data.map((e) => e.PP));
+	const maxPP = Math.max(...data.map((e) => e.PP));
+
+	const minTemp = Math.min(...data.map((e) => e.Temp));
+	const maxTemp = Math.max(...data.map((e) => e.Temp));
+
+	const minFog = Math.min(...data.map((e) => e.foggyDays));
+	const maxFog = Math.max(...data.map((e) => e.foggyDays));
+
+	const getRandomAngle = () => Math.random() * 360;
+
+	const yScaleDescription = d3
+		.scaleLinear()
+		.domain([0, 6])
+		.range([margin.top, height - margin.bottom]);
+
+	// arrange circles on the x-axis, based on the dataset
+	const xScale = d3
+		.scaleLinear()
+		.domain([0, 9])
+		.range([margin.left + space * 1.5, width - margin.right - space]);
+
+	const yScale = d3
+		.scaleLinear()
+		.domain([1970, 2000])
+		.range([margin.bottom, height - margin.bottom]);
+
+	const yScaleYAxis = d3
+		.scaleLinear()
+		.domain([0, 3])
+		.range([margin.bottom, height - margin.bottom]);
+
+	const rainScale = d3
+		.scaleLinear()
+		.domain([minPP, maxPP])
+		.range([radius.min, radius.max]);
+
+	// have to flip min/max temperature, to get blue = cold and red = hot
+	const tempScale = d3
+		.scaleSequential()
+		.domain([maxTemp, minTemp])
+		.interpolator(d3.interpolateRdYlBu); // d3 schemeColors
+
+	const fogSizeScale = d3
+		.scaleSequential()
+		.domain([minFog, maxFog])
+		.range([7, 15]);
+
+	// setup a gradient color to use for the temperature line in the description
 	const defs = description.append("defs");
 
 	const tempGradient = defs
@@ -66,81 +113,16 @@ function draw() {
 		.attr("offset", "100%")
 		.attr("stop-color", "#A50026");
 
-	// helper values for scaling
-	var minPP = Math.min(...data.map((e) => e.PP));
-	var maxPP = Math.max(...data.map((e) => e.PP));
-	console.log("PP: ", minPP, maxPP);
+	// setup the x- and y-axis
+	const xAxis = d3.axisTop(xScale).tickFormat((d) => `19x${d}`);
 
-	var minS = Math.min(...data.map((e) => e.snowDays));
-	var maxS = Math.max(...data.map((e) => e.snowDays));
-	console.log("H:", minS, maxS);
-
-	var minTemp = Math.min(...data.map((e) => e.Temp));
-	var maxTemp = Math.max(...data.map((e) => e.Temp));
-	console.log("Temp: ", minTemp, maxTemp);
-
-	var minFog = Math.min(...data.map((e) => e.foggyDays));
-	var maxFog = Math.max(...data.map((e) => e.foggyDays));
-	console.log("Fog: ", minFog, maxFog);
-
-	const getRandomAngle = () => Math.random() * 360;
-
-	var yScaleDescription = d3
-		.scaleLinear()
-		.domain([0, 6])
-		.range([margin.top, height - margin.bottom]);
-
-	// arrange circles on the x-axis, based on the dataset
-	var xScale = d3
-		.scaleLinear()
-		.domain([0, 9])
-		.range([margin.left + space * 1.5, width - margin.right - space]);
-
-	var yScale = d3
-		.scaleLinear()
-		.domain([1970, 2000])
-		.range([margin.bottom, height - margin.bottom]);
-
-	var yScaleYAxis = d3
-		.scaleLinear()
-		.domain([0, 3])
-		.range([margin.bottom, height - margin.bottom]);
-
-	var rainScale = d3
-		.scaleLinear()
-		.domain([minPP, maxPP])
-		.range([radius.min, radius.max]);
-
-	// have to flip it, to get blue = cold and red = hot
-	var tempScale = d3
-		.scaleSequential()
-		.domain([maxTemp, minTemp])
-		.interpolator(d3.interpolateRdYlBu); // d3 schemeColors
-
-	var fogColorScale = d3
-		.scaleSequential()
-		.domain([minFog, maxFog])
-		.interpolator(d3.interpolateRdPu); // d3 schemeColors
-
-	var fogSizeScale = d3
-		.scaleSequential()
-		.domain([minFog, maxFog])
-		.range([7, 15]);
-
-	const xAxis = d3
-		.axisTop(xScale)
-		.ticks(10) // Ensure we have ticks from 0 to 9
-		.tickFormat((d) => `19x${d}`);
-
-	const yTickValues = [0, 1, 2, 3]; // These are the positions in the domain
-	const yTickLabels = ["70s", "80s", "90s", "00s"]; // These are the custom labels
-
+	const yTickLabels = ["70s", "80s", "90s", "00s"];
 	const yAxis = d3
 		.axisLeft(yScaleYAxis)
-		.tickValues(yTickValues)
-		.tickFormat((d, i) => yTickLabels[i]);
+		.tickValues([0, 1, 2, 3])
+		.tickFormat((_, i) => yTickLabels[i]);
 
-	// Append a group element for the axis and translate it to the bottom of the SVG
+	// append axis to the canvas
 	canvas
 		.append("g")
 		.attr("transform", `translate(0, 20)`)
@@ -153,84 +135,76 @@ function draw() {
 		.attr("opacity", 0.3)
 		.call(yAxis);
 
-	const drawRain = () => {
+	function drawRain() {
 		canvas
 			.selectAll("rain")
 			.data(data)
 			.join("circle")
-			.attr("cx", function (d, i) {
+			.attr("cx", function (d) {
 				return xScale(d.Year);
-				// return (d.Year * space) + space
 			})
-			.attr("cy", function (d, i) {
+			.attr("cy", function (d) {
 				return yScale(d.Century);
-				return (d.Century - 1970) * 10 + space;
 			})
 			.attr("r", function (d) {
 				return rainScale(d.PP);
 			})
 			.attr("fill", colors.rain)
-			// .attr("transform", function(data, index) {
-			//     return `translate(${data.Year * space}, ${index})`
-			// })
-			.attr("class", function (d, i) {
+			.attr("class", function (d) {
 				return d.Year + d.Century;
 			});
-	};
+	}
 
-	const drawSnow = () => {
+	function drawSnow() {
 		data.forEach((element) => {
-			var padding = rainScale(element.PP);
-			var buff = 15;
+			const padding = rainScale(element.PP);
+			const buff = 15;
+			// use a for-loop, to draw one dot for every snow day of each element the dataset
 			for (let j = 0; j < element.snowDays; j++) {
-				var xMin = xScale(element.Year) - padding - buff;
-				var xMax = xScale(element.Year) + padding + buff;
-				var yMin = yScale(element.Century) - padding - buff;
-				var yMax = yScale(element.Century) + padding + buff;
+				// find the bounding-box for where to draw the snow dots within (size of the rain shape)
+				const xMin = xScale(element.Year) - padding - buff;
+				const xMax = xScale(element.Year) + padding + buff;
+				const yMin = yScale(element.Century) - padding - buff;
+				const yMax = yScale(element.Century) + padding + buff;
 
+				// position is random, relative to the bounding box
 				canvas
 					.append("circle")
 					.attr("cx", randomPosition(xMin, xMax))
 					.attr("cy", randomPosition(yMin, yMax))
-					.attr("r", function () {
-						r = rainScale(element.PP);
-						return 0.75;
-					})
-					.attr("fill", "white")
-					.attr("stroke", "none");
+					.attr("r", 0.75)
+					.attr("fill", "white");
 			}
 		});
-	};
+	}
 
-	const drawStorm = () => {
+	function drawStorm() {
 		data.forEach((element) => {
+			// use a for-loop, to draw one circle for every storm day of each element the dataset
 			for (let j = 0; j < element.stormDays; j++) {
 				canvas
 					.append("circle")
-					.attr("cx", function (d, i) {
-						return xScale(element.Year);
-						// return (d.Year * space) + space
-					})
-					.attr("cy", function (d, i) {
-						return yScale(element.Century);
-						return (d.Century - 1970) * 10 + space;
-					})
+					.attr("cx", xScale(element.Year))
+					.attr("cy", yScale(element.Century))
 					.attr("r", function () {
 						r = rainScale(element.PP);
-						return r + j * 4 + 4;
+						return r + j * 4 + 4; // increase radius of circle for each storm day added
 					})
 					.attr("fill", "none")
 					.attr("stroke", colors.storm);
 			}
 		});
-	};
+	}
 
-	const drawHail = () => {
+	function drawHail() {
 		data.forEach((element) => {
+			// use a for-loop, to draw one line for every hail day of each element the dataset
 			for (let j = 0; j < element.hailDays; j++) {
 				canvas
 					.append("line")
-					.attr("x1", function (d, i) {
+					.attr("x1", function () {
+						// lines are drawn from the center, and then to the left/right of the previous line, to create an effect of "centered lines"
+						// use modulo to calculate the position of the line
 						if (j % 2 == 0) {
 							return xScale(element.Year) + j * 2 + 1;
 						} else {
@@ -238,7 +212,7 @@ function draw() {
 						}
 					})
 					.attr("y1", function () {
-						var padding = rainScale(element.PP);
+						const padding = rainScale(element.PP);
 						return yScale(element.Century) - padding;
 					})
 					.attr("x2", function () {
@@ -249,63 +223,65 @@ function draw() {
 						}
 					})
 					.attr("y2", function () {
-						var padding = rainScale(element.PP);
+						const padding = rainScale(element.PP);
 						return yScale(element.Century) + padding;
 					})
-					.attr("stroke", colors.hail);
+					.attr("stroke", colors.hail)
+					.attr("stroke-linecap", "round");
 			}
 		});
-	};
+	}
 
-	const drawTemperature = () => {
+	function drawTemperature() {
 		canvas
 			.selectAll("temperature")
 			.data(data)
 			.join("line")
 			.attr("x1", function (d) {
-				var padding = rainScale(d.PP) + 4 + d.stormDays * 4;
+				const padding = rainScale(d.PP) + 4 + d.stormDays * 4;
 				return xScale(d.Year) - padding;
 			})
 			.attr("y1", function (d) {
-				var padding = rainScale(d.PP) + 20 + d.stormDays * 4;
+				const padding = rainScale(d.PP) + 20 + d.stormDays * 4;
 				return yScale(d.Century) + padding;
 			})
 			.attr("x2", function (d) {
-				var padding = rainScale(d.PP) + 4 + d.stormDays * 4;
+				const padding = rainScale(d.PP) + 4 + d.stormDays * 4;
 				return xScale(d.Year) + padding;
 			})
 			.attr("y2", function (d) {
-				var padding = rainScale(d.PP) + 20 + d.stormDays * 4;
+				const padding = rainScale(d.PP) + 20 + d.stormDays * 4;
 				return yScale(d.Century) + padding;
 			})
 			.attr("stroke", function (d) {
 				return tempScale(d.Temp);
 			})
 			.attr("stroke-width", 3)
-			.attr("class", function (d, i) {
+			.attr("stroke-linecap", "round")
+			.attr("class", function (d) {
 				return d.Year + d.Century + "-" + d.Temp;
 			});
-	};
+	}
 
-	const drawFog = () => {
+	function drawFog() {
 		canvas
 			.selectAll("fog")
 			.data(data)
 			.join("path")
 			.attr("d", fogPath)
 			.attr("fill", "#f686bd")
-			.attr("stroke", "none")
 			.attr("opacity", 0.6)
 			.attr("transform", function (d, i) {
-				var x = xScale(d.Year);
-				var y = yScale(d.Century);
+				const x = xScale(d.Year);
+				const y = yScale(d.Century);
 				console.log(x, y);
 				return `translate(${x}, ${y}) scale(${fogSizeScale(d.foggyDays)}) rotate(${getRandomAngle()})`;
 			});
-	};
+	}
 
-	const drawDescriptionShapes = () => {
-		var pad = 20;
+	// draws one shape for every datapoint, to be used in the how-to-read data section
+	function drawDescriptionShapes() {
+		const pad = 20;
 
 		// PP - min
 		description
@@ -315,13 +291,6 @@ function draw() {
 			.attr("r", 20)
 			.attr("fill", colors.rain);
 
-		// // PP - max
-		// description.append("circle")
-		//     .attr("cx", margin.left * 3)
-		//     .attr("cy", yScaleDescription(0))
-		//     .attr("r", 20)
-		//     .attr("fill", colors.rain)
-
 		// Temperature
 		description
 			.append("rect")
@@ -329,6 +298,7 @@ function draw() {
 			.attr("y", yScaleDescription(1))
 			.attr("width", 50)
 			.attr("height", 5)
+            .attr("rx", 3)
 			.attr("fill", "url(#line-gradient)")
 			.attr("stroke-width", 10);
 
@@ -351,16 +321,17 @@ function draw() {
 				.attr("y1", yScaleDescription(3) + pad)
 				.attr("x2", margin.left + pad / 2 + i * 6)
 				.attr("y2", yScaleDescription(3) + pad * 3.2)
+				.attr("stroke-linecap", "round")
 				.attr("stroke", colors.hail);
 		}
 
 		// Snow - 15 dots
 		for (let i = 0; i < 15; i++) {
-			var buff = 15;
-			var xMin = margin.left;
-			var xMax = margin.left * 2;
-			var yMin = yScaleDescription(4) + pad * 1.5;
-			var yMax = yScaleDescription(5) + pad;
+			const buff = 15;
+			const xMin = margin.left;
+			const xMax = margin.left * 2;
+			const yMin = yScaleDescription(4) + pad * 1.5;
+			const yMax = yScaleDescription(5) + pad;
 			description
 				.append("circle")
 				.attr("cx", randomPosition(xMin, xMax))
@@ -379,20 +350,13 @@ function draw() {
 			.attr("opacity", 0.6)
 			.attr(
 				"transform",
-				`translate(${margin.left + 10}, ${yScaleDescription(
-					6
-				)}) scale(${9}) rotate(${20})`
+				`translate(${margin.left + 10}, 
+                ${yScaleDescription(6)}) 
+                scale(${9}) rotate(${20})`
 			);
+	}
 
-		// // Fog - max
-		// description.append("path")
-		//     .attr("d", fogPath)
-		//     .attr("fill", "#f686bd")
-		//     .attr("stroke", "none")
-		//     .attr("opacity", 0.6)
-		//     .attr("transform", `translate(${margin.left + pad + 50}, ${yScaleDescription(6)}) scale(${15}) rotate(${30})`)
-	};
-
+	// call functions to draw the data viz
 	drawDescriptionShapes();
 	drawRain();
 	drawStorm();
@@ -401,3 +365,6 @@ function draw() {
 	drawSnow();
 	drawFog();
 }
+
+// helper function
+const randomPosition = (min, max) => Math.random() * (max - min) + min;
