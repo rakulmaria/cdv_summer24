@@ -51,11 +51,7 @@ function draw() {
 
 	const getRandomAngle = () => Math.random() * 360;
 
-	const yScaleDescription = d3
-		.scaleLinear()
-		.domain([0, 6])
-		.range([margin.top, height - margin.bottom]);
-
+	// setup scales for the dataviz
 	// arrange circles on the x-axis, based on the dataset
 	const xScale = d3
 		.scaleLinear()
@@ -76,6 +72,11 @@ function draw() {
 		.scaleLinear()
 		.domain([minPP, maxPP])
 		.range([radius.min, radius.max]);
+
+	const yScaleDescription = d3
+		.scaleLinear()
+		.domain([0, 6])
+		.range([margin.top, height - margin.bottom]);
 
 	// have to flip min/max temperature, to get blue = cold and red = hot
 	const tempScale = d3
@@ -298,7 +299,7 @@ function draw() {
 			.attr("y", yScaleDescription(1))
 			.attr("width", 50)
 			.attr("height", 5)
-            .attr("rx", 3)
+			.attr("rx", 3)
 			.attr("fill", "url(#line-gradient)")
 			.attr("stroke-width", 10);
 
