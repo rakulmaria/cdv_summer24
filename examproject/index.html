@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Exam project</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="header">
+		<h1>The weather of the Faroe Islands</h1>
+		<h2>1973 - 2001</h2>
+	</div>	
+
+	<div class="description">
+		<div class="intro">
+			<p>"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."</p>
+		</div>
+		<div class="how-to-read">
+			<h2>How to read the data?</h2>
+			<p>Total annual rain or snow percipation. The bigger the circle, the higher the percipation. Ranges from 1055 - 2084 PP. </p>
+			<p>Average annual temperature. Lower temperature is blue, higher temperature is red. Ranges from 5.4 - 7.4°C. </p>
+			<p>Number of days with storm. Each yellow circle represents a day with storm. Ranges from 0 - 5 days.</p>
+			<p>Number of days with hail. Each light-blue line represents a day with hail. Ranges from 1 - 33 days.</p>
+			<p>Number of days with snow. Each white dot represents a day with snow. Ranges from 7 - 93 days.</p>
+			<p>Number of days with fog. The bigger the cloud, the more foggy days. Rotation of cloud is random. Ranges from 20 - 59 days.</p>
+		</div>
+
+		<div id="data-description">
+			<!-- the shapes for the data description -->
+		</div>
+	</div>
+
+
+	<div id="canvas">
+		<!-- main canvas for data viz -->
+	</div>
+
+	<div class="source">
+		<!-- source -->
+		<p>Data retrieved from XYZ dataset.</p>
+		<p>© 2024 Rakul Maria Hjalmarsdóttir Tórgarð</p>
+		<p>Full source code can be found on <a href="google.com">github</a>.</p>
+	</div>
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+	<script src="script.js"></script>
+</body>
+</html>

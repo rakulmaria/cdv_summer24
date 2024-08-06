@@ -12,11 +12,13 @@ d3.json('data.json').then(function(d) {
     draw()
 });
 
+
 // function that maps input to output
 // D3 creates a function myScale which accepts input between 0 and 16 (the domain) and maps it to output between margin.left and width-margin.right (the range).
 // var xScale = d3.scaleLinear()
 //     .domain([0, 60])
 //     .range([margin.left, width - margin.right]);
+
 
 function getMax(array) {
     var max = 0;
@@ -38,12 +40,13 @@ const randomPosition = (min, max) => Math.random() * (max - min) + min;
 // }
 
 function draw() {
+
     const drawCircles = (group, count, xMin, xMax, color, cond) => {
         group.selectAll("circle")
                 .data(d3.range(count))
                 .join("circle")
                 .attr("cx", () => randomPosition(xMin, xMax))
-                .attr("cy", () => randomPosition(20, height) - 20)
+                .attr("cy", () => randomPosition(0, height))
                 .attr("r", 5)
                 .attr("fill", (cond) ? color : "none")
                 .attr("opacity", 0.7)
@@ -55,9 +58,19 @@ function draw() {
             .data(d3.range(count))
             .join("rect")
             .attr("x", () => randomPosition(xMin, xMax))
-            .attr("y", () => randomPosition(20, height) - 20)
+            .attr("y", () => randomPosition(0, height))
             .attr("width", 10)
             .attr("height", 10)
+            .attr("fill", (cond) ? color : "none")
+            .attr("opacity", 0.7)
+            .attr("stroke", color);
+    }
+
+    const drawTriangles = (group, count, xMin, xMax, color, cond) => {
+        group.selectAll("polygon")
+            .data(d3.range(count))
+            .join("polygon")
+            .attr("point", "250,60 100,400 400,400")
             .attr("fill", (cond) ? color : "none")
             .attr("opacity", 0.7)
             .attr("stroke", color);
@@ -69,15 +82,16 @@ function draw() {
             console.log(dataset, count, getMax(dataset))
 
             var b = (getMax(dataset) == count) ? true : false
+            
             if (index == 0) {
-                drawCircles(group, count, xMin, xMax, "orange", b);
+                drawTriangles(group, count, xMin, xMax, "#ECF5B0", b);
             } else if (index == 1) {
-                drawRectangles(group, count, xMin, xMax, "red", b);
+                drawRectangles(group, count, xMin, xMax, "#A0D9BF", b);
             } else if (index == 2) {
-                drawCircles(group, count, xMin, xMax, "green", b);
+                drawRectangles(group, count, xMin, xMax, "#D6ABD9", b);
             } else if (index == 3) {
-                drawRectangles(group, count, xMin, xMax, "blue", b);
-            }
+                drawCircles(group, count, xMin, xMax, "#B5C2EB", b);
+            } 
         });
     };
     
@@ -87,7 +101,17 @@ function draw() {
             .attr("width", width)
             .attr("height", height)
             //.attr("viewBox", [0, 0, width, height]) // not sure if this makes sense or not!
-            .style("background-color", "lightblue");
+            .style("background-color", "#0D0D0D");
+
+    svg.append("rect")
+        .join("rect")
+        .attr("x", padding - 15 )
+        .attr("y", 0)
+        .attr("width", width - padding)
+        .attr("height", height)
+        .attr("fill", "none")
+        .attr("stroke", "white");
+        
 
         // // append x-axis to the canvas
         // svg.append("g")
