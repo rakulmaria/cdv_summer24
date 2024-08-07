@@ -8,10 +8,10 @@ const space = 40;
 const radius = { min: 17, max: 40 };
 const colors = {
 	background: "#212529",
-	rain: "#0077b6",
-	hail: "#90e0ef",
-	storm: "#ffd100",
-	fog: "#6c757d",
+	rain: "#2c7bb6",
+	hail: "#abd9e9",
+	storm: "#fdae61",
+	fog: "#d7191c",
 };
 
 // SVG for the description - containing one element of each of the datapoints
@@ -113,28 +113,6 @@ function draw() {
 		.append("stop")
 		.attr("offset", "100%")
 		.attr("stop-color", "#A50026");
-
-	// setup the x- and y-axis
-	const xAxis = d3.axisTop(xScale).tickFormat((d) => `19x${d}`);
-
-	const yTickLabels = ["70s", "80s", "90s", "00s"];
-	const yAxis = d3
-		.axisLeft(yScaleYAxis)
-		.tickValues([0, 1, 2, 3])
-		.tickFormat((_, i) => yTickLabels[i]);
-
-	// append axis to the canvas
-	canvas
-		.append("g")
-		.attr("transform", `translate(0, 20)`)
-		.attr("opacity", 0.3)
-		.call(xAxis);
-
-	canvas
-		.append("g")
-		.attr("transform", `translate(30, 0)`)
-		.attr("opacity", 0.3)
-		.call(yAxis);
 
 	function drawRain() {
 		canvas
@@ -357,6 +335,30 @@ function draw() {
 			);
 	}
 
+	function drawAxes() {
+		// setup the x- and y-axis
+		const xAxis = d3.axisTop(xScale).tickFormat((d) => `19x${d}`);
+
+		const yTickLabels = ["70s", "80s", "90s", "00s"];
+		const yAxis = d3
+			.axisLeft(yScaleYAxis)
+			.tickValues([0, 1, 2, 3])
+			.tickFormat((_, i) => yTickLabels[i]);
+
+		// append axis to the canvas
+		canvas
+			.append("g")
+			.attr("transform", `translate(0, 20)`)
+			.attr("opacity", 0.3)
+			.call(xAxis);
+
+		canvas
+			.append("g")
+			.attr("transform", `translate(30, 0)`)
+			.attr("opacity", 0.3)
+			.call(yAxis);
+	}
+
 	// call functions to draw the data viz
 	drawDescriptionShapes();
 	drawRain();
@@ -365,6 +367,7 @@ function draw() {
 	drawHail();
 	drawSnow();
 	drawFog();
+	drawAxes();
 }
 
 // helper function
